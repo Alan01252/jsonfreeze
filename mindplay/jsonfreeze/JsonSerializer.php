@@ -23,7 +23,8 @@ use \ReflectionClass;
  */
 class JsonSerializer
 {
-  const TYPE = '#type';
+  private $_classTypeAttribute = '#type';
+  
   const HASH = '#hash';
   
   /**
@@ -44,12 +45,15 @@ class JsonSerializer
   /**
    * @param bool $pretty Whether or not to enable "pretty" JSON formatting.
    */
-  public function __construct($pretty = true)
+  public function __construct($pretty = true, $classTypeAttribute = null)
   {
     if (!$pretty) {
       $this->indentation = '';
       $this->newline = '';
       $this->padding = '';
+    }
+    if(!is_null($classTypeAttribute)){
+    	$this->_classTypeAttribute = $classTypeAttribute;
     }
   }
   
@@ -74,7 +78,8 @@ class JsonSerializer
    */
   public function unserialize($string)
   {
-  	$data = json_decode(addcslashes($string,"\\"), true);
+
+  	$data = json_decode($string, true);
     if(!$data){
     	throw new \Exception("invalid json string");
     }
@@ -110,7 +115,7 @@ class JsonSerializer
     
     $whitespace = $this->newline . str_repeat($this->indentation, $indent+1);
     
-    $string = '{' . $whitespace . '"' . self::TYPE . '":' . $this->padding . json_encode($type);
+    $string = '{' . $whitespace . '"' . $this->_classTypeAttribute . '":' . $this->padding . json_encode($type);
     
     foreach ($this->_getClassProperties($type) as $name => $prop) {
       $string .= ',' . $whitespace . json_encode($name) . ':' . $this->padding . $this->_serialize($prop->getValue($object), $indent+1);
@@ -146,7 +151,7 @@ class JsonSerializer
   {
     $whitespace = $this->newline . str_repeat($this->indentation, $indent+1);
     
-    $string = '{'. $whitespace . '"' . self::TYPE . '":' . $this->padding . '"' . self::HASH . '"';
+    $string = '{'. $whitespace . '"' . $this->_classTypeAttribute . '":' . $this->padding . '"' . self::HASH . '"';
     
     foreach ($hash as $key => $item) {
       $string .= ',' . $whitespace . json_encode($key) . ':' . $this->padding . $this->_serialize($item, $indent+1);
@@ -165,8 +170,8 @@ class JsonSerializer
     if (!is_array($data))
       return $data; // scalar value is fully unserialized
     
-    if (array_key_exists(self::TYPE, $data)) {
-      if ($data[self::TYPE] === self::HASH) {
+    if (array_key_exists($this->_classTypeAttribute, $data)) {
+      if ($data[$this->_classTypeAttribute] === self::HASH) {
         return $this->_unserializeHash($data);
       } else {
         return $this->_unserializeObject($data);
@@ -181,7 +186,7 @@ class JsonSerializer
    */
   protected function _unserializeObject($data)
   {
-    $type = $data[self::TYPE];
+    $type = $data[$this->_classTypeAttribute];
     
     $object = unserialize('O:'.strlen($type).':"'.$type.'":0:{}');
 
@@ -221,7 +226,7 @@ class JsonSerializer
     $hash = array();
     
     foreach ($data as $name => $value) {
-      if ($name === self::TYPE)
+      if ($name === $this->_classTypeAttribute)
         continue;
       
       $hash[$name] = $this->_unserialize($value);
