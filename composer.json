@@ -17,6 +17,6 @@
       }
   },
   "extra": {
-    "branch-alias": { "dev-master": "1.0.x-dev-dynamictype" }
+    "branch-alias": { "dev-dynamictype": "1.0.x-dev-dynamictype" }
   }
 }
