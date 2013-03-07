@@ -74,9 +74,11 @@ class JsonSerializer
    */
   public function unserialize($string)
   {
-    $data = json_decode($string, true);
-    
-    return $this->_unserialize($data);
+  	$data = json_decode(addcslashes($string,"\\"), true);
+    if(!$data){
+    	throw new \Exception("invalid json string");
+    }
+  	return $this->_unserialize($data);
   }
   
   /**
