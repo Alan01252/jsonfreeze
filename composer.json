@@ -1,6 +1,6 @@
 {
   "name": "mindplay/jsonfreeze",
-  "version": "1.0.0-dev-dynamictype",
+  "version": "1.0.0-dev",
   "type": "library",
   "description": "JSON Serialization library",
   "license": "LGPL-3.0+",
@@ -17,6 +17,6 @@
       }
   },
   "extra": {
-    "branch-alias": { "dev-dynamictype": "1.0.x-dev-dynamictype" }
+    "branch-alias": { "dev-dynamictype": "1.0.x-dev" }
   }
 }
